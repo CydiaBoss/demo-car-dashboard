@@ -1,0 +1,34 @@
+@import './base.css';
+
+#app {
+  height: 100vh;
+  margin: 0 auto;
+  padding: 0.15rem;
+  font-weight: normal;
+  display: grid;
+  gap: 0.15rem;
+}
+
+input[type='range'] {
+  appearance: none;
+  width: 80%;
+  height: 15px;
+  border-radius: 1.5em;
+  background: var(--vt-c-grey-3);
+}
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: var(--vt-c-black);
+  border-radius: 25px;
+  cursor: pointer;
+}
+input[type='range']::-moz-range-thumb {
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: var(--vt-c-black);
+  border-radius: 25px;
+  cursor: pointer;
+}
