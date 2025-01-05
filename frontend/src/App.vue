@@ -5,6 +5,7 @@ import MiddleRow from './components/MiddleRow.vue';
 import BottomButtons from './components/BottomButtons.vue';
 
 import { ref } from 'vue';
+import { getDataChannel } from './composables/datachannel';
 
 // Indicator controls
 const parkingBreak = ref(false);
@@ -22,6 +23,10 @@ const batteryTemp = ref(25);
 const motorSpeed = ref(0);
 const motorPower = ref(0);
 const charging = ref(false);
+
+// Data Channel Setup
+const { data, connect, updateSettings } = getDataChannel();
+connect();
 
 // Simulation values
 const motorSpeedTarget = ref(0);

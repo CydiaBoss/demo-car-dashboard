@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS MotorData (
     GearRatio CHAR(16),
     BatteryLevel FLOAT(6),
     BatteryTemp FLOAT(6),
-    MotorSpeed FLOAT(6)
+    MotorSpeed FLOAT(6),
+    MotorPower FLOAT(6)
 );

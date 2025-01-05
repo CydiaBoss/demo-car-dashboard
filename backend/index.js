@@ -24,7 +24,7 @@ const mysqlDB = mysql.createPool({
 expressWs(app);
 
 // Websocket endpoint (To do real-time stuff)
-app.ws('/ws', (ws, req) => {
+app.ws('/data', (ws, req) => {
   // Connection Msg
   console.log("Client connected")
 

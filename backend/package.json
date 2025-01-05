@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --env-file=.env index.js",
-    "db": "node --env-file=.env db/db_setup.js"
+    "db": "node --env-file=.env db/index.js"
   },
   "author": "",
   "license": "ISC",
