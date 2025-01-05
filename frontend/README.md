@@ -1,35 +1,14 @@
-# car-dashboard
+# Car Dashboard Demo Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+This part of the repo contains the frontend of the car dashboard.
+It is what the user will interact with to control the car/motor.
 
-## Recommended IDE Setup
+## Installation
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+NodeJS version 22.12.0 was used for this depolyment.
+Clone the repo and run `npm install` in this directory to install all the dependencies.
+That's it!
 
-## Customize configuration
+## Start
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+To run the frontend, simply run `npm run dev`
