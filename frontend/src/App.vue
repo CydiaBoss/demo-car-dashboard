@@ -4,32 +4,16 @@ import Gauges from './components/Gauges.vue';
 import MiddleRow from './components/MiddleRow.vue';
 import BottomButtons from './components/BottomButtons.vue';
 
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { getDataChannel } from './composables/datachannel';
 
-// Indicator controls
-const parkingBreak = ref(false);
-const checkEngine = ref(false);
-const motorStatus = ref(false);
-const lowBattery = ref(false);
-
-// Constant values
-const threshold = 0.001;
-
-// Device values
-const gearRatio = ref("1/2");
-const batteryPercent = ref(100);
-const batteryTemp = ref(25);
-const motorSpeed = ref(0);
-const motorPower = ref(0);
-const charging = ref(false);
-
 // Data Channel Setup
-const { data, connect, updateSettings } = getDataChannel();
+const { data, dataConnected, connect, updateSettings } = getDataChannel();
 connect();
 
-// Simulation values
-const motorSpeedTarget = ref(0);
+// Local values
+const motorSpeedSetting = ref(0);
+const charging = ref(false);
 
 /**
  * Listener for motor speed slider change
@@ -39,42 +23,56 @@ const motorSpeedTarget = ref(0);
  */
 function onMotorSpeedChange(newValue, oldValue) {
   // Desired motor speed
-  motorSpeedTarget.value = newValue * 200;
+  motorSpeedSetting.value = newValue;
+  
+  // Update Backend
+  updateSettings(motorSpeedSetting.value, charging.value);
 }
 
 /**
  * Listener for charger button change
  */
- function onChargeButtonToggle() {
+function onChargeButtonToggle() {
   // Desired motor speed
   charging.value = !charging.value;
+  
+  // Update Backend
+  updateSettings(motorSpeedSetting.value, charging.value);
 }
 
-// Simulation delays
-setInterval(() => {
-  // Calculate delta change
-  let deltachange = (motorSpeedTarget.value - motorSpeed.value)/100;
-
-  // Update motor speed
-  if (Math.abs(deltachange) > threshold) {
-    motorSpeed.value += deltachange;
+watch(dataConnected, (newValue, oldValue) => {
+  // Update upon first connect only
+  if(newValue) {
+    motorSpeedSetting.value = data.motorSettings.MotorSpeed;
+    charging.value = data.motorSettings.ChargeMode == 1;
   }
-
-  // Update motor power
-  motorPower.value = motorSpeed.value * 1.25; // P = F * V (random math)
-
-  // Indicator updates
-  parkingBreak.value = Math.floor(motorSpeed.value) == 0;
-  motorStatus.value = motorSpeed.value > 700;
-  lowBattery.value = batteryPercent.value < 20;
-}, 2);
+});
 </script>
 
 <template>
-  <Indicators :parking-break="parkingBreak" :check-engine="checkEngine" :motor-status="motorStatus" :low-battery="lowBattery"/>
-  <Gauges :power="motorPower" :speed="motorSpeed" />
-  <MiddleRow @update:motor-speed="onMotorSpeedChange" :gear-ratio="gearRatio" :battery-percent="batteryPercent" :battery-temp="batteryTemp" :motor-speed="motorSpeed"/>
-  <BottomButtons :charge-mode="charging" @click:charge="onChargeButtonToggle"/>
+  <Indicators 
+    :parking-break="data.indicators.ParkingBreak == 1" 
+    :check-engine="data.indicators.CheckEngine == 1" 
+    :motor-status="data.indicators.MotorStatus == 1" 
+    :low-battery="data.indicators.LowBattery == 1" 
+  />
+  <Gauges 
+    :power="data.motorData.MotorPower" 
+    :speed="data.motorData.MotorSpeed" 
+  />
+  <MiddleRow 
+    v-model="motorSpeedSetting"
+    @update:modelValue="onMotorSpeedChange" 
+    :gear-ratio="data.motorData.GearRatio" 
+    :battery-percent="data.motorData.BatteryLevel" 
+    :battery-temp="data.motorData.BatteryTemp" 
+    :motor-speed="data.motorData.MotorSpeed" 
+    :init-motor-speed-setting="motorSpeedSetting"
+  />
+  <BottomButtons 
+    @click:charge="onChargeButtonToggle" 
+    :charge-mode="charging" 
+  />
 </template>
 
 <style scoped></style>

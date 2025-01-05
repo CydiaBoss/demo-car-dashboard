@@ -39,29 +39,18 @@ app.ws('/data', (ws, req) => {
     // Update motor speed if valid
     if (payload.motorSpeed !== undefined && typeof(payload.motorSpeed) == "number" && payload.motorSpeed >= 0 && payload.motorSpeed <= 4) {
       console.log('Updating motor speed to: ', payload.motorSpeed);
-      mysqlDB.query('UPDATE MotorSettings SET MotorSpeed = ?;', [payload.motorSpeed], (err, results, fields) => {
-        if (err) {
-          console.log('Error updating motor speed: ', err);
-          return;
-        }
-
-        console.log('Motor speed updated to ', payload.motorSpeed);
+      mysqlDB.query(`UPDATE MotorSettings SET MotorSpeed = ${payload.motorSpeed};`).then(() => {
+        console.log('Updated motor speed to: ', payload.motorSpeed);
       });
     }
 
     // Update charge status if valid
     if (payload.chargeStatus !== undefined && typeof(payload.chargeStatus) == "number" && (payload.chargeStatus == 0 || payload.chargeStatus == 1)) {
       console.log('Updating charge status to: ', payload.chargeStatus);
-      mysqlDB.query('UPDATE MotorSettings SET ChargeMode = ?;', [payload.chargeStatus == 1 ? "true" : "false"], (err, results, fields) => {
-        if (err) {
-          console.log('Error updating motor speed: ', err);
-          return;
-        }
-
-        console.log('Motor speed updated to ', payload.motorSpeed);
+      mysqlDB.query(`UPDATE MotorSettings SET ChargeMode = ${payload.chargeStatus == 1 ? "true" : "false"};`).then(() => {
+        console.log('Updated charge status to: ', payload.chargeStatus);
       });
     }
-
   });
 
   // Keep sending "real-time" data to frontend
@@ -72,7 +61,7 @@ app.ws('/data', (ws, req) => {
     
 
     ws.send(JSON.stringify(data));
-  }, 2500);
+  }, 10);
 
   // Close the connection
   ws.on('close', () => {

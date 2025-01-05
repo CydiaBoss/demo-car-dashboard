@@ -1,6 +1,4 @@
-import { ref, onUnmounted } from "vue";
-
-const backend = ref("localhost:8000");
+import { ref, reactive, onUnmounted } from "vue";
 
 /**
  * Creates a composable interface for the backend connection
@@ -8,8 +6,31 @@ const backend = ref("localhost:8000");
  * @returns composable version of websocket connection
  */
 export function getDataChannel() {
-    const data = ref({});
+    // Private refs
+    const backend = ref("localhost:3000");
     const websocket = ref(null);
+    const dataConnected = ref(false);
+
+    // Exposed data payload
+    const data = reactive({
+        indicators: {
+            "ParkingBreak": 0,
+            "CheckEngine": 0,
+            "MotorStatus": 0,
+            "LowBattery": 0
+        },
+        motorData: {
+            "GearRatio": "1/2",
+            "BatteryLevel": 100,
+            "BatteryTemp": 25,
+            "MotorSpeed": 0,
+            "MotorPower": 0
+        },
+        motorSettings: {
+            "MotorSpeed": 0,
+            "ChargeMode": 0
+        }
+    });
 
     // Connect to the backend websocket
     const connect = () => {
@@ -22,7 +43,8 @@ export function getDataChannel() {
 
         // On new data received
         websocket.value.onmessage = (msg) => {
-            data.value = JSON.parse(msg.data);
+            Object.assign(data, JSON.parse(msg.data));
+            dataConnected.value = true;
         };
 
         // On close connection
@@ -40,8 +62,8 @@ export function getDataChannel() {
     const updateSettings = (motorSpeedSetting=0, chargeStatus=0) => {
         if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
             websocket.value.send(JSON.stringify({
-                motorSpeed: motorSpeedSetting,
-                chargeStatus: chargeStatus
+                motorSpeed: Number(motorSpeedSetting),
+                chargeStatus: chargeStatus ? 1 : 0
             }));
         }
     }
@@ -58,6 +80,7 @@ export function getDataChannel() {
     // Return functions as Vue composable
     return {
         data,
+        dataConnected,
         connect,
         updateSettings,
         disconnect

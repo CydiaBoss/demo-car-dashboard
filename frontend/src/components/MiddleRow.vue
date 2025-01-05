@@ -1,6 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue'
-
 // Props from the parent component
 const props = defineProps({
   gearRatio: {
@@ -25,16 +23,10 @@ const props = defineProps({
   },
 });
 
-// Events to handle motor speed setting
-const emits = defineEmits(['update:motorSpeed']);
-
 // Derive motor speed setting from motor speed
-const motorSpeedSetting = ref(Math.round(props.motorSpeed / 200));
-
-// Watch for changes in motor speed setting
-watch(motorSpeedSetting, (newValue, oldValue) => {
-  // Emit to parent component
-  emits('update:motorSpeed', newValue, oldValue);
+const motorSpeedSetting = defineModel({
+  required: true,
+  default: 0
 });
 </script>
 
