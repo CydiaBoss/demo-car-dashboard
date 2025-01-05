@@ -1,32 +1,33 @@
 const express = require('express');
 const expressWs = require('express-ws');
 
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 
 const sim = require('./simulation');
 
 const app = express();
 const port = 3000;
 
-// Setup DB Connection
-const mysqlDB = mysql.createConnection({
+// Setup DB Connection Pool
+const mysqlDB = mysql.createPool({
   host: process.env.DBURL,
   port: process.env.DBPORT,
   user: process.env.DBUSER,
   password: process.env.DBPASS,
-  database: process.env.DBNAME
+  database: process.env.DBNAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
-mysqlDB.connect();
 
 // Sets up websocket stuff
 expressWs(app);
 
-// Grab latest data
-let data = sim.grabLatestData(mysqlDB);
-console.log(data);
-
 // Websocket endpoint (To do real-time stuff)
-app.ws('/', (ws, req) => {
+app.ws('/ws', (ws, req) => {
+  // Connection Msg
+  console.log("Client connected")
+
   // Recieve messages from frontend
   ws.on('message', (msg) => {
     console.log('Received message from client: ', msg);
@@ -63,9 +64,14 @@ app.ws('/', (ws, req) => {
 
   });
 
-  // Run simulation and send real-time data to frontend
-  simLoop = setInterval(() => {
-    sim.runSim();
+  // Keep sending "real-time" data to frontend
+  simLoop = setInterval(async () => {
+    data = await sim.grabLatestData(mysqlDB);
+
+    // Run simulation with data
+    
+
+    ws.send(JSON.stringify(data));
   }, 2500);
 
   // Close the connection
@@ -79,5 +85,3 @@ app.ws('/', (ws, req) => {
 app.listen(port, () => {
     console.log(`Demo car dashboard backend listening on port ${port}`)
 });
-
-mysqlDB.end();

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 // Setup DB Connection
 const mysqlDB = mysql.createConnection({
@@ -9,7 +9,6 @@ const mysqlDB = mysql.createConnection({
     password: process.env.DBPASS,
     database: process.env.DBNAME
 });
-mysqlDB.connect();
 
 // Start a transaction to make tables
 mysqlDB.beginTransaction((err) => {
