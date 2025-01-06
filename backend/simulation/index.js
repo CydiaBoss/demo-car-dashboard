@@ -47,8 +47,8 @@ function runSimulation(mysqlDB, initData) {
     // Update motor data
     let dataUpdated = false;
 
-    // Speed adjustment (Accounts for charge mode)
-    let targetSpeed = Number(initData.motorSettings.ChargeMode == 0) * initData.motorSettings.MotorSpeed * RPM_PER_STEP;
+    // Speed adjustment (Accounts for battery level and charge mode)
+    let targetSpeed = initData.motorData.BatteryLevel > THRESHOLD ? Number(initData.motorSettings.ChargeMode == 0) * initData.motorSettings.MotorSpeed * RPM_PER_STEP : 0;
     if (Math.abs(initData.motorData.MotorSpeed - targetSpeed) > THRESHOLD) {
         // Realistic speed adjustment
         let deltaSpeed = (targetSpeed - initData.motorData.MotorSpeed)/10;
