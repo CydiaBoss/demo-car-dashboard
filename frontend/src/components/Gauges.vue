@@ -1,4 +1,5 @@
 <script setup>
+// Props from parent component
 const props = defineProps({
   // The power of the motor
   power: {
@@ -19,6 +20,7 @@ const props = defineProps({
 </script>
 
 <template>
+  <!-- The guages are made using the canvas-guage module with a lot of customizations -->
   <div class="guages">
     <!-- Power Guage Setup -->
     <canvas
@@ -115,16 +117,16 @@ const props = defineProps({
 
 <style scoped>
 .guages {
-  height: 50vh; /* 50% of the viewport height */
+  height: 50vh; 
   min-height: 15em;
   display: flex;
-  justify-content: space-around; /* Evenly space the guages */
+  justify-content: space-around; 
   padding: 0.25rem;
   background-color: var(--vt-c-grey-4);
   border-radius: 0.25em;
 }
 .guages > canvas {
-  margin: auto 0; /* Center the guages */
+  margin: auto 0; 
   padding: 0;
 }
 </style>

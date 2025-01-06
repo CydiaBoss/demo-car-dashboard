@@ -1,17 +1,22 @@
 <script setup>
+// Props from parent component
 const props = defineProps({
+  // Parking break indicator
   parkingBreak: {
     type: Boolean,
     default: false,
   },
+  // Checking engine indicator
   checkEngine: {
     type: Boolean,
     default: false,
   },
+  // Motor status indicator
   motorStatus: {
     type: Boolean,
     default: false,
   },
+  // Low battery indicator
   lowBattery: {
     type: Boolean,
     default: false,
@@ -61,7 +66,7 @@ const props = defineProps({
   filter: brightness(0) saturate(100%) invert(12%) sepia(88%) saturate(6338%) hue-rotate(0deg) brightness(103%) contrast(114%);
 }
 .disabled {
-  /* Converts any icon into the background */
+  /* Converts any icon into disabled shade */
   filter: brightness(0) saturate(100%) invert(10%) sepia(0%) saturate(8%) hue-rotate(168deg) brightness(94%) contrast(95%);
 }
 </style>

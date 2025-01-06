@@ -1,6 +1,4 @@
 <script setup>
-import { ref } from 'vue';
-
 // Props for the component
 const props = defineProps({
   // Charge mode status
@@ -53,14 +51,14 @@ button {
   cursor: pointer;
 }
 button:hover {
-  filter: brightness(85%);
+  filter: brightness(85%); /* Adds a focusing effect for user */
 }
 img {
   height: 100%;
   padding: 1em;
 }
-img:active {
-  transform: scale(0.95);
+img:active { 
+  transform: scale(0.95); /* Adds a responsive effect for user */
 }
 .bottom-btns {
   height: 15vh;
@@ -108,6 +106,7 @@ img:active {
   border: 1.5px solid var(--vt-c-div-border);
 }
 .toggled {
+  /* Converts the charging button to a shade of blue */
   filter: brightness(0) saturate(100%) invert(38%) sepia(33%) saturate(7487%) hue-rotate(194deg) brightness(106%) contrast(103%);
 }
 </style>

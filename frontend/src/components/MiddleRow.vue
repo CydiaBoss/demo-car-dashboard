@@ -1,21 +1,25 @@
 <script setup>
 // Props from the parent component
 const props = defineProps({
+  // Gear ratio of the motor
   gearRatio: {
     type: String,
     required: true,
     default: "N/A",
   },
+  // Battery percentage
   batteryPercent: {
     type: Number,
     required: true,
     default: NaN,
   },
+  // Temperature of the battery
   batteryTemp: {
     type: Number,
     required: true,
     default: NaN,
   },
+  // Speed of the motor in rpm
   motorSpeed: {
     type: Number,
     required: true,
@@ -23,7 +27,7 @@ const props = defineProps({
   },
 });
 
-// Derive motor speed setting from motor speed
+// Use the motor speed value as the v-model parameter
 const motorSpeedSetting = defineModel({
   required: true,
   default: 0

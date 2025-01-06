@@ -11,7 +11,6 @@ const READ_QUERIES = [
 const THRESHOLD = 0.001; // To assume 0 at threshold
 const RPM_PER_STEP = 200; // since 4 settings and max rpm is 800 rpm, so 200 rpm per level
 
-
 /**
  * Grabs the latest data from the database
  * 
@@ -44,7 +43,7 @@ function runSimulation(mysqlDB, initData) {
     // Fast clone
     let finalData = JSON.parse(JSON.stringify(initData));
     
-    // Update motor data
+    // Update motor data (minimize database calls when not needed)
     let dataUpdated = false;
 
     // Speed adjustment (Accounts for battery level and charge mode)
@@ -86,7 +85,7 @@ function runSimulation(mysqlDB, initData) {
     let deltaBatteryTemp = 0.01 * Math.abs(initData.motorData.MotorSpeed)/800 - 0.001 * (initData.motorData.BatteryTemp - 25);
     finalData.motorData.BatteryTemp += deltaBatteryTemp;
 
-    // If less than room temp, assume plateaued
+    // If less than room temp, assume stablized
     if (finalData.motorData.BatteryTemp < 25) {
         finalData.motorData.BatteryTemp = 25;
     }else{
@@ -98,7 +97,7 @@ function runSimulation(mysqlDB, initData) {
     finalData.indicators.LowBattery = Number(finalData.motorData.BatteryLevel <= 20);
 
     // Database updates
-    // Need to update MotorData
+    // Need to update MotorData check
     if (dataUpdated) {
         mysqlDB.query(`UPDATE MotorData SET 
             MotorSpeed = ${finalData.motorData.MotorSpeed},
@@ -107,7 +106,7 @@ function runSimulation(mysqlDB, initData) {
             BatteryTemp = ${finalData.motorData.BatteryTemp}
         WHERE id = 1;`);
     }
-    // Need to update Indicators
+    // Need to update Indicators check
     if (
         initData.indicators.MotorStatus != finalData.indicators.MotorStatus ||
         initData.indicators.LowBattery != finalData.indicators.LowBattery

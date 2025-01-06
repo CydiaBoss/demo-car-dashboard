@@ -72,9 +72,11 @@ export function getDataChannel() {
     const disconnect = () => {
         if (websocket.value) {
             websocket.value.close();
+            dataConnected.value = false;
         }
     }
 
+    // Disconnect from backend to stop backend calculations
     onUnmounted(disconnect);
 
     // Return functions as Vue composable

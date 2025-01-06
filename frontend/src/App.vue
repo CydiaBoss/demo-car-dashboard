@@ -9,7 +9,7 @@ import { getDataChannel } from './composables/datachannel';
 
 // Data Channel Setup
 const { data, dataConnected, connect, updateSettings } = getDataChannel();
-connect();
+connect(); // Connect to the backend via websocket
 
 // Local values
 const motorSpeedSetting = ref(0);
@@ -40,8 +40,8 @@ function onChargeButtonToggle() {
   updateSettings(motorSpeedSetting.value, charging.value);
 }
 
+// Update upon first connect only
 watch(dataConnected, (newValue, oldValue) => {
-  // Update upon first connect only
   if(newValue) {
     motorSpeedSetting.value = data.motorSettings.MotorSpeed;
     charging.value = data.motorSettings.ChargeMode == 1;
