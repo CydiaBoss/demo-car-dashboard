@@ -34,7 +34,7 @@ app.ws('/data', (ws, req) => {
 
     // Convert to Object
     // Format: {motorSpeed: 0, chargeStatus: 0}
-    payload = JSON.parse(msg);
+    let payload = JSON.parse(msg);
 
     // Update motor speed if valid
     if (payload.motorSpeed !== undefined && typeof(payload.motorSpeed) == "number" && payload.motorSpeed >= 0 && payload.motorSpeed <= 4) {
@@ -54,13 +54,13 @@ app.ws('/data', (ws, req) => {
   });
 
   // Keep sending "real-time" data to frontend
-  simLoop = setInterval(async () => {
-    data = await sim.grabLatestData(mysqlDB);
+  let simLoop = setInterval(async () => {
+    let data = await sim.grabLatestData(mysqlDB);
 
     // Run simulation with data
-    
+    let new_data = sim.runSimulation(mysqlDB, data);
 
-    ws.send(JSON.stringify(data));
+    ws.send(JSON.stringify(new_data));
   }, 10);
 
   // Close the connection
