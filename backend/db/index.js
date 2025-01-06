@@ -41,7 +41,7 @@ Promise.all(table_creation).then(() => {
 
     // Insert default values
     Promise.all([
-        mysqlDB.query('INSERT INTO Indicators (ParkingBreak, CheckEngine, MotorStatus, LowBattery) VALUES (true, false, false, false);'),
+        mysqlDB.query('INSERT INTO Indicators (ParkingBreak, CheckEngine, MotorStatus, LowBattery) VALUES (false, false, false, false);'),
         mysqlDB.query('INSERT INTO MotorData (GearRatio, BatteryLevel, BatteryTemp, MotorSpeed, MotorPower) VALUES ("1/2", 100.0, 25.0, 0.0, 0.0);'),
         mysqlDB.query('INSERT INTO MotorSettings (MotorSpeed, ChargeMode) VALUES (0, false);')
     ]).then(() => {

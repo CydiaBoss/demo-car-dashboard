@@ -1,3 +1,4 @@
+
 import { ref, reactive, onUnmounted } from "vue";
 
 /**
@@ -7,7 +8,6 @@ import { ref, reactive, onUnmounted } from "vue";
  */
 export function getDataChannel() {
     // Private refs
-    const backend = ref("localhost:3000");
     const websocket = ref(null);
     const dataConnected = ref(false);
 
@@ -34,7 +34,7 @@ export function getDataChannel() {
 
     // Connect to the backend websocket
     const connect = () => {
-        websocket.value = new WebSocket(`ws://${backend.value}/data`);
+        websocket.value = new WebSocket(`ws://${import.meta.env.VITE_BACKEND}/data`);
         
         // On connect notification
         websocket.value.onopen = () => {
