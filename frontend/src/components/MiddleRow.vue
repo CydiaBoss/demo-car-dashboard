@@ -39,12 +39,12 @@ const motorSpeedSetting = defineModel({
     </div>
     <div>
       <img class="middle-row-icon" src="../assets/battery.png" alt="battery percentage" />
-      {{ batteryPercent }}
+      {{ Math.round(batteryPercent * 100)/100 }}
       <p class="unit">%</p>
     </div>
     <div>
       <img class="middle-row-icon" src="../assets/batterytemp.png" alt="battery temperature" />
-      {{ batteryTemp }}
+      {{ Math.round(batteryTemp * 100)/100 }}
       <p class="unit">°C</p>
     </div>
     <div>

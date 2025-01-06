@@ -1,11 +1,16 @@
 const mysql = require('mysql2/promise');
 
 // Default Read Queries
-const READQUERIES = [
+const READ_QUERIES = [
     'SELECT * FROM Indicators WHERE id = 1;',
     'SELECT * FROM MotorData WHERE id = 1;',
     'SELECT * FROM MotorSettings WHERE id = 1;'
 ];
+
+// Simulation values
+const THRESHOLD = 0.001; // To assume 0 at threshold
+const RPM_PER_STEP = 200; // since 4 settings and max rpm is 800 rpm, so 200 rpm per level
+
 
 /**
  * Grabs the latest data from the database
@@ -16,7 +21,7 @@ const READQUERIES = [
  */
 async function grabLatestData(mysqlDB) {
     // Make promises with read request
-    let promises = READQUERIES.map((sql) => mysqlDB.query(sql));
+    let promises = READ_QUERIES.map((sql) => mysqlDB.query(sql));
     let results = await Promise.all(promises);
 
     // Return
@@ -42,27 +47,26 @@ function runSimulation(mysqlDB, initData) {
     // Update motor data
     let dataUpdated = false;
 
-    // Speed adjustment (since 4 settings and max rpm is 800 rpm, so 200 rpm per level)
-    let targetSpeed = initData.motorSettings.MotorSpeed * 200;
-    if (initData.motorData.MotorSpeed != targetSpeed) {
+    // Speed adjustment (Accounts for charge mode)
+    let targetSpeed = Number(initData.motorSettings.ChargeMode == 0) * initData.motorSettings.MotorSpeed * RPM_PER_STEP;
+    if (Math.abs(initData.motorData.MotorSpeed - targetSpeed) > THRESHOLD) {
         // Realistic speed adjustment
-        let deltaSpeed = Math.round((targetSpeed - initData.motorData.MotorSpeed)/10);
+        let deltaSpeed = (targetSpeed - initData.motorData.MotorSpeed)/10;
         finalData.motorData.MotorSpeed += deltaSpeed;
         dataUpdated = true;
     }
 
-    // Power adjustment
-    let targetPower = (initData.motorSettings.ChargeMode == 0 ? 1 : -1) * targetSpeed * 1.25;
-    if (initData.motorData.MotorSpeed != targetSpeed) {
+    // Power adjustment (Switch targets depending on charge mode)
+    let targetPower = initData.motorSettings.ChargeMode == 0 ? targetSpeed * 1.25 : -1000;
+    if (Math.abs(initData.motorData.MotorPower - targetPower) > THRESHOLD) {
         // Realistic power adjustment
-        let deltaPower = Math.round((targetPower - initData.motorData.MotorPower)/10);
+        let deltaPower = (targetPower - initData.motorData.MotorPower)/10;
         finalData.motorData.MotorPower += deltaPower;
         dataUpdated = true;
     }
 
-    // Battery adjustment
-    if (Math.abs(initData.motorData.MotorPower) > 0) {
-        // Battery level adjustment
+    // Battery level adjustment
+    if (initData.motorSettings.MotorSpeed != 0 || initData.motorSettings.ChargeMode == 1) {
         // Different behaviour depending on charging
         let deltaBattery = 0.1 * initData.motorData.MotorPower/1000;
         finalData.motorData.BatteryLevel -= deltaBattery;
@@ -75,22 +79,21 @@ function runSimulation(mysqlDB, initData) {
         }else{
             dataUpdated = true;
         }
+    }
 
-        //Battery temp adjustment
-        // Different behaviour depending on power level (0.001 heat dissipation in relation with room temp)
-        let deltaBatteryTemp = 0.01 * Math.abs(initData.motorData.MotorPower)/1000 - 0.001 * (initData.motorData.BatteryTemp - 25);
-        finalData.motorData.BatteryTemp += deltaBatteryTemp;
+    // Battery temp adjustment
+    // Different behaviour depending on power level (0.001 heat dissipation in relation with room temp)
+    let deltaBatteryTemp = 0.01 * Math.abs(initData.motorData.MotorSpeed)/800 - 0.001 * (initData.motorData.BatteryTemp - 25);
+    finalData.motorData.BatteryTemp += deltaBatteryTemp;
 
-        // If less than room temp, assume plateaued
-        if (finalData.motorData.BatteryTemp < 25) {
-            finalData.motorData.BatteryTemp = 25;
-        }else{
-            dataUpdated = true;
-        }
+    // If less than room temp, assume plateaued
+    if (finalData.motorData.BatteryTemp < 25) {
+        finalData.motorData.BatteryTemp = 25;
+    }else{
+        dataUpdated = true;
     }
 
     // Update indicators if needed
-    finalData.indicators.ParkingBreak = Number(finalData.motorData.MotorSpeed == 0);
     finalData.indicators.MotorStatus = Number(finalData.motorData.MotorSpeed >= 700);
     finalData.indicators.LowBattery = Number(finalData.motorData.BatteryLevel <= 20);
 
@@ -106,12 +109,10 @@ function runSimulation(mysqlDB, initData) {
     }
     // Need to update Indicators
     if (
-        initData.indicators.ParkingBreak != finalData.indicators.ParkingBreak ||
         initData.indicators.MotorStatus != finalData.indicators.MotorStatus ||
         initData.indicators.LowBattery != finalData.indicators.LowBattery
     ) {
         mysqlDB.query(`UPDATE Indicators SET 
-            ParkingBreak = ${finalData.indicators.ParkingBreak == 1},
             MotorStatus = ${finalData.indicators.MotorStatus == 1},
             LowBattery = ${finalData.indicators.LowBattery == 1}
         WHERE id = 1;`);
